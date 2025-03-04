@@ -25,7 +25,7 @@ export interface UpdateIssueDto {
   isAssigned?: Boolean;
   departmentId?: string;    
   authorId?: string; 
-  assignedUserId?: string;     
+  assignedUserId?: string;   
 }
 
 

@@ -9,6 +9,7 @@ import { errorHandler } from '../middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import path from 'path';
+import commentRoutes from './comment-routes';
 
 const swaggerOptions = {
     definition: {
@@ -43,6 +44,7 @@ router.use('/', issueRouter, errorHandler);
 router.use('/', departamentRoutes, errorHandler);
 router.use('/', labelRoutes, errorHandler);
 router.use('/', authRoutes);
+router.use("/comments", commentRoutes);
 
 // Configuração do Swagger
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui.min.css";
