@@ -9,31 +9,42 @@ export class IssuesController {
         this.useCase = issueUseCase
     }
 
-    createIssue = async(req: Request, res: Response, next: NextFunction) =>{
+    createIssue = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {title, description, departmentId, authorId} = req.body
-            const response = await this.useCase.createIssue({title, description, departmentId, authorId})
-            return res.status(200).json(response)
+            const { title, description, departmentId, authorId, labelIds } = req.body;
+        
+            // Chama o useCase passando um array de labelIds
+            const response = await this.useCase.createIssue({
+            title,
+            description,
+            departmentId,
+            authorId,
+            });
+        
+            return res.status(201).json(response);
         } catch (error) {
             next(error);
         }
-    }
+    };
+      
 
-    getIssueById = async(req: Request, res: Response, next: NextFunction) =>{
+    getIssueById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const response = await this.useCase.getIssuesById({ id })
-            return res.status(200).json(response)
+          const { id } = req.params;
+      
+          const response = await this.useCase.getIssuesById(id);
+      
+          return res.status(200).json(response);
         } catch (error) {
-            next(error);
+          next(error);
         }
-    }
+      };
     
     updateIssue = async(req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params
-            const {title, description, status, departmentId, authorId} = req.body
-            const response = await this.useCase.updateIssue({ id, title, description,status, departmentId, authorId})
+            const {title, description, status, isAssigned, departmentId, authorId, assignedUserId} = req.body
+            const response = await this.useCase.updateIssue({ id, title, description, status, isAssigned, departmentId, authorId, assignedUserId})
             return res.status(200).json(response)
         } catch (error) {
             next(error);

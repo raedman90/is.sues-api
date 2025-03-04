@@ -1,73 +1,97 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String      @id @default(uuid())
-  name         String
-  email        String      @unique
-  password String
-  occupation String
-  adm Boolean
-  photo String?
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-  issues       Issue[]
+  id             String      @id @default(uuid())
+  departmentId   String?
+  email          String      @unique
+  name           String
+  password       String
+  adm            Boolean
+  occupation     String
+  photo          String?
+  assignedIssues Issue[]     @relation("AssignedToIssue")
+  issues         Issue[]     @relation("AuthorOfIssue")
+  department     Department? @relation(fields: [departmentId], references: [id])
+  comments       Comment[]   @relation("UserComments")
+
   @@map("users")
 }
 
 model Issue {
-  id String @id @default(uuid())
-  title String
-  description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  status Boolean @default(false)
-  author User @relation(fields: [authorId], references: [id])
-  authorId String
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId String
+  id             String     @id @default(uuid())
+  title          String
+  description    String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  status         Boolean    @default(false)
+  isAssigned     Boolean    @default(false)
+  author         User       @relation("AuthorOfIssue", fields: [authorId], references: [id])
+  authorId       String
+  assignedUser   User?      @relation("AssignedToIssue", fields: [assignedUserId], references: [id])
+  assignedUserId String?
+  department     Department @relation(fields: [departmentId], references: [id])
+  departmentId   String
+  comments       Comment[]  @relation("IssueComments")
+
   @@map("issues")
-  
 }
 
 model Department {
   id        String  @id @default(uuid())
   name      String
+  companyId String
   company   Company @relation(fields: [companyId], references: [id])
-  companyId String  // Chave estrangeira para Empresa
-  issues   Issue[]
-  labels Label[]
+  issues    Issue[]
+  labels    Label[]
   users     User[]
+
   @@map("departments")
 }
 
 model Company {
   id          String       @id @default(uuid())
   name        String
-  email String @unique
-  password String
-  latitude  Float?
-  longitude Float?
   description String?
-  headid String?
+  email       String       @unique
+  password    String
+  latitude    Float?
+  longitude   Float?
+  headid      String?
   departments Department[]
+
   @@map("companies")
 }
 
-model Label{
-  id Int @id @default(autoincrement())
-  name String
-  description String
-  department   Department @relation(fields: [departmentId], references: [id])
+model Label {
+  id           Int        @id @default(autoincrement())
+  name         String
+  description  String
   departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
   @@map("labels")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento com a Issue
+  issue   Issue  @relation("IssueComments", fields: [issueId], references: [id], onDelete: Cascade)
+  issueId String
+
+  // Relacionamento com o Usuário (autor do comentário)
+  author   User   @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+
+  @@map("comments")
 }

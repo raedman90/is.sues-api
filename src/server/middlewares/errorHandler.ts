@@ -1,34 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { ValidationError, DatabaseError } from '../Error/CustomError';
+import { Request, Response, NextFunction } from "express";
+import { ValidationError, DatabaseError } from "../Error/CustomError";
 
-export const errorHandler = (
-    error: Error | ValidationError, 
-    req: Request, 
-    res: Response, 
-    next: NextFunction
-) => {
-    if (error instanceof ValidationError) {
-        const validationErrors = error.details.errors.map(e => {
-            return {
-                field: e.path.join('.'),
-                message: e.message
-            };
-        });
-        console.log(validationErrors);
-        return res.status(400).json({ 
-            success: false, 
-            error: error.message, 
-            validationErrors: validationErrors
-        });
+export const errorHandler = (e: unknown, req: Request, res: Response, next: NextFunction) => { // ✅ Agora `e` tem tipo correto
+    console.error("🚨 Erro capturado pelo errorHandler:", e);
+
+    if (e instanceof ValidationError) {
+        return res.status(400).json({ success: false, error: e.message, details: e.details });
     }
-    if (error instanceof DatabaseError) {
-        console.error(error);
-        return res.status(500).json({ success: false, error: error.message });
+
+    if (e instanceof DatabaseError) {
+        return res.status(500).json({ success: false, error: e.message, details: e.details });
     }
-    res.status(500).json({ success: false, error: "Erro interno do servidor" });
+
+    return res.status(500).json({ success: false, error: "Erro interno do servidor" });
 };
-
-
-
-
-
